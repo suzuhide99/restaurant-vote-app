@@ -841,9 +841,11 @@ function setupPasswordScreen() {
             // 認証成功
             sessionStorage.setItem('authenticated', 'true');
             passwordError.style.display = 'none';
+            if (typeof soundEffects !== 'undefined' && soundEffects.playSubmitSound) {
+                soundEffects.playSubmitSound();
+            }
             showScreen('welcome-screen');
             startApp();
-            soundEffects.playSubmitSound();
         } else {
             // 認証失敗
             passwordError.style.display = 'block';
@@ -946,7 +948,7 @@ function startApp() {
             }
         });
     });
-});
+}
 
 // ルーレット機能
 function startRoulette() {

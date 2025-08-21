@@ -1,5 +1,4 @@
-// パスワード認証
-const CORRECT_PASSWORD = '3sisters'; // パスワードを設定
+// パスワード認証機能は削除済み
 
 // 姉妹のデータ
 const sisters = [
@@ -809,56 +808,12 @@ function showTags(tags, tagsDiv) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded');
     
-    // パスワードが既に入力済みかチェック
-    if (sessionStorage.getItem('authenticated') === 'true') {
-        showScreen('welcome-screen');
-        startApp();
-    } else {
-        setupPasswordScreen();
-    }
+    // 直接ウェルカム画面を表示
+    showScreen('welcome-screen');
+    startApp();
 });
 
-// パスワード認証画面の設定
-function setupPasswordScreen() {
-    const passwordInput = document.getElementById('password-input');
-    const passwordSubmit = document.getElementById('password-submit');
-    const passwordError = document.getElementById('password-error');
-    
-    // エンターキーでも認証
-    passwordInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkPassword();
-        }
-    });
-    
-    // ボタンクリックで認証
-    passwordSubmit.addEventListener('click', checkPassword);
-    
-    function checkPassword() {
-        const inputPassword = passwordInput.value;
-        
-        if (inputPassword === CORRECT_PASSWORD) {
-            // 認証成功
-            sessionStorage.setItem('authenticated', 'true');
-            passwordError.style.display = 'none';
-            if (typeof soundEffects !== 'undefined' && soundEffects.playSubmitSound) {
-                soundEffects.playSubmitSound();
-            }
-            showScreen('welcome-screen');
-            startApp();
-        } else {
-            // 認証失敗
-            passwordError.style.display = 'block';
-            passwordInput.value = '';
-            passwordInput.classList.add('shake');
-            soundEffects.playButtonClick();
-            
-            setTimeout(() => {
-                passwordInput.classList.remove('shake');
-            }, 500);
-        }
-    }
-}
+// パスワード認証機能は削除済み
 
 function startApp() {
     // オートコンプリートを設定

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3姉妹のレストラン決定アプリ</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA対応 -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180.png?v=1">
+    <link rel="apple-touch-icon" sizes="152x152" href="./icons/apple-touch-icon-152.png?v=1">
+    <link rel="apple-touch-icon" sizes="167x167" href="./icons/apple-touch-icon-167.png?v=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="3姉妹投票">
+    <meta name="theme-color" content="#ff6b6b">
+    <meta name="description" content="3姉妹でレストランを楽しく決めるアプリ">
+</head>
+<body>
+    <div class="container">
+        <!-- パスワード認証画面 -->
+        <div id="password-screen" class="screen active">
+            <div class="password-container">
+                <h1>🔐 アクセス認証</h1>
+                <p class="password-subtitle">パスワードを入力してください</p>
+                <div class="password-input-section">
+                    <input type="password" id="password-input" placeholder="パスワード" autocomplete="off">
+                    <button class="password-btn" id="password-submit">入室</button>
+                </div>
+                <div id="password-error" class="password-error" style="display: none;">
+                    パスワードが間違っています
+                </div>
+            </div>
+        </div>
+
+        <!-- 開始画面 -->
+        <div id="welcome-screen" class="screen">
+            <h1>🍽️ 今日どこで食べる？ 🍽️</h1>
+            <p class="subtitle">3姉妹でレストランを決めよう！</p>
+            <button class="start-btn">はじめる</button>
+        </div>
+
+        <!-- 投票画面 -->
+        <div id="voting-screen" class="screen">
+            <div class="sister-header">
+                <div class="sister-avatar" id="current-avatar"></div>
+                <h2 id="sister-name"></h2>
+                <p class="instruction">食べたいお店を3つ書いてね！</p>
+            </div>
+
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <span class="input-number">1.</span>
+                    <div class="autocomplete-container">
+                        <input type="text" id="choice1" class="restaurant-input" placeholder="1つ目のお店" autocomplete="off">
+                        <div id="autocomplete1" class="autocomplete-items"></div>
+                        <div id="tags1" class="selected-tags"></div>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <span class="input-number">2.</span>
+                    <div class="autocomplete-container">
+                        <input type="text" id="choice2" class="restaurant-input" placeholder="2つ目のお店" autocomplete="off">
+                        <div id="autocomplete2" class="autocomplete-items"></div>
+                        <div id="tags2" class="selected-tags"></div>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <span class="input-number">3.</span>
+                    <div class="autocomplete-container">
+                        <input type="text" id="choice3" class="restaurant-input" placeholder="3つ目のお店" autocomplete="off">
+                        <div id="autocomplete3" class="autocomplete-items"></div>
+                        <div id="tags3" class="selected-tags"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-btn">決定！</button>
+        </div>
+
+        <!-- 結果発表待機画面 -->
+        <div id="ready-screen" class="screen">
+            <div class="ready-container">
+                <h2>🎉 みんなの投票が完了！ 🎉</h2>
+                <p class="ready-message">準備はいい？</p>
+                <button class="reveal-btn">結果発表！</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <h2>みんなの選んだお店</h2>
+            
+            <div class="sisters-choices">
+                <div class="sister-result">
+                    <div class="sister-avatar sister1"></div>
+                    <h3>長女</h3>
+                    <ul id="sister1-choices"></ul>
+                </div>
+                <div class="sister-result">
+                    <div class="sister-avatar sister2"></div>
+                    <h3>次女</h3>
+                    <ul id="sister2-choices"></ul>
+                </div>
+                <div class="sister-result">
+                    <div class="sister-avatar sister3"></div>
+                    <h3>三女</h3>
+                    <ul id="sister3-choices"></ul>
+                </div>
+            </div>
+
+            <div class="winner-section">
+                <h2>今日のお店は...</h2>
+                <div id="winner-result"></div>
+            </div>
+
+            <button class="roulette-start-btn">ルーレットで決める！</button>
+            <button class="restart-btn">もう一度</button>
+        </div>
+
+        <!-- ルーレット画面 -->
+        <div id="roulette-screen" class="screen">
+            <h2>🎰 運命のルーレット 🎰</h2>
+            <div class="roulette-container">
+                <div class="roulette-wheel" id="roulette-wheel">
+                    <!-- ルーレットのセグメントが動的に追加される -->
+                </div>
+                <div class="roulette-pointer"></div>
+            </div>
+            <button class="spin-btn" id="spin-btn">ルーレット開始！</button>
+            <div class="roulette-result" id="roulette-result" style="display: none;">
+                <h3>今日のお店は決定！</h3>
+                <div class="final-restaurant" id="final-restaurant"></div>
+            </div>
+            <button class="restart-btn-roulette" style="display: none;">もう一度最初から</button>
+        </div>
+
+        <!-- 全員一致の特別演出 -->
+        <div id="celebration" style="display: none;">
+            <div class="fireworks"></div>
+            <div class="celebration-message">
+                <h1>🎉 奇跡の全員一致！ 🎉</h1>
+                <p id="unanimous-choice"></p>
+            </div>
+        </div>
+        
+        <!-- 部分一致の演出 -->
+        <div id="partial-celebration" style="display: none;">
+            <div class="stars"></div>
+            <div class="partial-celebration-message">
+                <h1>⭐ みんなの気持ちが重なった！ ⭐</h1>
+                <p id="partial-match-choice"></p>
+            </div>
+        </div>
+        
+        <!-- タグ一致の演出 -->
+        <div id="tag-celebration" style="display: none;">
+            <div class="tag-bubbles"></div>
+            <div class="tag-celebration-message">
+                <h1>🏷️ 好みが似てる！ 🏷️</h1>
+                <p id="tag-match-info"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 紙吹雪エフェクト用 -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="restaurants-db.js"></script>
+    <script src="sound-effects.js"></script>
+    <script src="app.js"></script>
+    
+    <!-- Service Worker登録 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker登録成功:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker登録失敗:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

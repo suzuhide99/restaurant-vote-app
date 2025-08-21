@@ -1,0 +1,11 @@
+.env
+.env.*
+node_modules/
+__pycache__/
+*.sqlite*
+dist/
+build/
+.next/
+.vercel/
+coverage/
+.DS_Store

@@ -344,6 +344,7 @@ function showResultsAfterDrumroll() {
     // ルーレットボタンの表示制御
     const rouletteBtn = document.querySelector('.roulette-start-btn');
     let isUnanimous = false; // 全員一致フラグ
+    let shouldShowRoulette = false; // ルーレットボタン表示フラグ
     
     // タグ一致がある場合の勝者を決定
     let tagMatchWinner = null;
@@ -392,12 +393,14 @@ function showResultsAfterDrumroll() {
         isUnanimous = false; // 全員一致ではない
         if (winners.length === 1) {
             // 単独勝利
+            shouldShowRoulette = false; // 勝者が決まっているのでルーレット不要
             winnerResultDiv.innerHTML = `
                 <div>🏆 ${capitalizeFirst(winners[0])} 🏆</div>
                 <span class="vote-count">${maxVotes}票</span>
             `;
         } else {
             // 同票
+            shouldShowRoulette = true; // 同票なのでルーレットで決定
             winnerResultDiv.innerHTML = `
                 <div>同票で決まらず！</div>
                 <div class="tie-message">
@@ -409,6 +412,7 @@ function showResultsAfterDrumroll() {
     } else {
         // 票が分散
         soundEffects.playDisappointment();
+        shouldShowRoulette = true; // 票が分散した場合はルーレットで決定
         if (winners.length === 1) {
             winnerResultDiv.innerHTML = `
                 <div>🍴 ${capitalizeFirst(winners[0])} 🍴</div>
@@ -432,10 +436,10 @@ function showResultsAfterDrumroll() {
     
     // ルーレットボタンの表示/非表示を制御
     if (rouletteBtn) {
-        if (isUnanimous) {
-            rouletteBtn.style.display = 'none'; // 全員一致の場合は非表示
+        if (isUnanimous || !shouldShowRoulette) {
+            rouletteBtn.style.display = 'none'; // 全員一致または単独勝利の場合は非表示
         } else {
-            rouletteBtn.style.display = 'block'; // 意見が分かれた場合は表示
+            rouletteBtn.style.display = 'block'; // 決着がつかない場合は表示
         }
     }
     

@@ -1100,12 +1100,14 @@ function startApp() {
         console.log('Reveal button event listener added');
     }
     
-    // ルーレット開始ボタンのイベントリスナー
-    const rouletteStartBtn = document.querySelector('.roulette-start-btn');
-    if (rouletteStartBtn) {
-        rouletteStartBtn.addEventListener('click', startRoulette);
-        console.log('Roulette start button event listener added');
-    }
+    // ルーレット開始ボタンのイベントリスナー（イベント委譲）
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('roulette-start-btn')) {
+            console.log('ルーレット開始ボタンがクリックされました！');
+            e.preventDefault();
+            startRoulette();
+        }
+    });
     
     // ルーレット回転ボタンのイベントリスナー
     const spinBtn = document.getElementById('spin-btn');
@@ -1135,10 +1137,12 @@ function startApp() {
 // ルーレット機能
 function startRoulette() {
     soundEffects.playButtonClick();
-    // 全ての選択肢を集める（9個）
+    // 全ての選択肢を集める
     const allChoices = [];
-    for (let i = 1; i <= 3; i++) {
-        const choices = votingData.choices[`sister${i}`];
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        const personKey = `person${person.id}`;
+        const choices = votingData.choices[personKey];
         choices.forEach(choice => {
             allChoices.push(choice);
         });

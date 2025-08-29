@@ -381,15 +381,17 @@ function showResultsAfterDrumroll() {
     if (partialMatches.length > 0 && maxVotes >= appSettings.personCount) {
         // 部分一致がある場合（全員が同じ店を選んだ）- これを最優先に
         isUnanimous = true; // 全員一致
+        shouldShowRoulette = false; // 真の全員一致なのでルーレット不要
         showPartialMatchCelebration(partialMatches[0], maxVotes);
         soundEffects.playFanfare();
     } else if (tagMatches.length > 0) {
-        // タグ一致（全員が同じジャンルを選んだが、店は異なる）
+        // タグ一致（全員が共通のジャンルを選んだ - 真の全員一致）
         isUnanimous = true; // 全員一致
+        shouldShowRoulette = false; // 真の全員一致なのでルーレット不要
         showTagMatchCelebration(tagMatches);
         soundEffects.playTagMatch();
     } else if (maxVotes >= Math.ceil(appSettings.personCount / 2)) {
-        // 過半数以上獲得
+        // 過半数以上獲得（単なる人気店・人気ジャンル含む）
         isUnanimous = false; // 全員一致ではない
         if (winners.length === 1) {
             // 単独勝利
@@ -410,7 +412,7 @@ function showResultsAfterDrumroll() {
             `;
         }
     } else {
-        // 票が分散
+        // 票が分散（人気ジャンルでも決定的でない場合含む）
         soundEffects.playDisappointment();
         shouldShowRoulette = true; // 票が分散した場合はルーレットで決定
         if (winners.length === 1) {

@@ -6,23 +6,6 @@
 
 **[https://suzuhide99.github.io/restaurant-vote-app/](https://suzuhide99.github.io/restaurant-vote-app/)**
 
-## 💻 開発者向け - ローカル実行
-
-開発やカスタマイズする場合のローカル実行方法：
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/suzuhide99/restaurant-vote-app.git
-cd restaurant-vote-app
-
-# 静的ファイルサーバーで実行
-python -m http.server 8000
-# または
-npx serve .
-```
-
-その後、ブラウザでローカルサーバーにアクセスしてください（通常は `http://localhost:8000`）。
-
 ## 📱 PWA機能
 
 - **ホーム画面に追加**: Safari → 共有 → ホーム画面に追加
@@ -55,6 +38,23 @@ npx serve .
 2. **投票**: 各人が食べたいお店を入力（オートコンプリート対応）
 3. **結果発表**: 自動で集計・演出付きで結果表示
 4. **ルーレット**: 決まらない時は運命のルーレットで決定！
+
+## 💻 開発者向け - ローカル開発
+
+ソースコードを編集・カスタマイズしたい開発者向けの情報：
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/suzuhide99/restaurant-vote-app.git
+cd restaurant-vote-app
+
+# 静的ファイルサーバーで実行
+python -m http.server 8000
+# または
+npx serve .
+```
+
+**注意**: 上記コマンド実行後、ターミナルに表示されるローカルアドレス（通常 `http://localhost:8000`）にブラウザでアクセスしてください。
 
 ## 📄 ライセンス
 

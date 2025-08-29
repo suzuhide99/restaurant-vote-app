@@ -402,7 +402,7 @@ function showResultsAfterDrumroll() {
                 <div>同票で決まらず！</div>
                 <div class="tie-message">
                     ${winners.map(w => capitalizeFirst(w)).join(' と ')} が${maxVotes}票で同じ！
-                    <br>じゃんけんで決めよう！
+                    <br>ルーレットで決めよう！
                 </div>
             `;
         }
@@ -424,7 +424,7 @@ function showResultsAfterDrumroll() {
                 <div>意見が分かれちゃった！</div>
                 <div class="tie-message">
                     ${topChoices} などが${maxVotes}票
-                    <br>話し合って決めよう！
+                    <br>ルーレットで決めよう！
                 </div>
             `;
         }

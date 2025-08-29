@@ -1391,7 +1391,7 @@ function spinRoulette() {
         
         // ボタンを再表示して再利用可能にする
         spinBtn.disabled = false;
-        spinBtn.textContent = 'もう一度回す！';
+        spinBtn.textContent = '泣きの一回！';
         spinBtn.style.display = 'block';
     }, 7000);
 }

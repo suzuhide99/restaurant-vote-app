@@ -150,14 +150,20 @@ function generateInputFields() {
 
 // 画面切り替え
 function showScreen(screenId) {
+    console.log(`画面切り替え: ${screenId}`);
     const screens = document.querySelectorAll('.screen');
+    console.log('全画面数:', screens.length);
     screens.forEach(screen => {
         screen.classList.remove('active');
     });
     
     const targetScreen = document.getElementById(screenId);
+    console.log(`ターゲット画面 ${screenId}:`, targetScreen);
     if (targetScreen) {
         targetScreen.classList.add('active');
+        console.log(`画面 ${screenId} をアクティブにしました`);
+    } else {
+        console.error(`画面 ${screenId} が見つかりません！`);
     }
 }
 
@@ -1137,15 +1143,33 @@ function startApp() {
 // ルーレット機能
 function startRoulette() {
     soundEffects.playButtonClick();
+    console.log('startRoulette関数が呼ばれました');
+    console.log('現在の設定:', appSettings);
+    console.log('投票データ:', votingData);
+    
     // 全ての選択肢を集める
     const allChoices = [];
     for (let i = 0; i < appSettings.personCount; i++) {
         const person = votingData.peopleOrder[i];
         const personKey = `person${person.id}`;
+        console.log(`${i+1}番目の人: ${person.name}, キー: ${personKey}`);
+        
         const choices = votingData.choices[personKey];
-        choices.forEach(choice => {
-            allChoices.push(choice);
-        });
+        console.log(`${personKey}の選択:`, choices);
+        
+        if (choices && choices.length > 0) {
+            choices.forEach(choice => {
+                allChoices.push(choice);
+            });
+        }
+    }
+    
+    console.log('ルーレット用の全選択肢:', allChoices);
+    
+    if (allChoices.length === 0) {
+        console.error('ルーレット用の選択肢が空です！');
+        alert('ルーレットに使用する選択肢がありません。投票を確認してください。');
+        return;
     }
     
     // ルーレット画面をリセット
@@ -1155,6 +1179,7 @@ function startRoulette() {
     createRouletteWheel(allChoices);
     
     // ルーレット画面を表示
+    console.log('ルーレット画面に遷移します');
     showScreen('roulette-screen');
 }
 

@@ -224,27 +224,34 @@ function updateNavigationButtons() {
     const prevBtn = document.getElementById('prev-person-btn');
     const nextBtn = document.getElementById('next-person-btn');
     
+    console.log('updateNavigationButtons呼び出し');
+    console.log('カンニング防止モード:', appSettings.cheatingPrevention);
+    console.log('現在の人:', votingData.currentPerson);
+    
     if (appSettings.cheatingPrevention === 'flexible') {
         // 柔軟モード：ナビゲーションボタンを表示
         if (prevBtn) {
-            prevBtn.style.display = votingData.currentPerson > 0 ? 'inline-block' : 'none';
+            const showPrev = votingData.currentPerson > 0;
+            prevBtn.style.display = showPrev ? 'inline-block' : 'none';
+            console.log('前の人ボタン表示:', showPrev);
         }
         if (nextBtn) {
-            // 次の人に投票済みデータがある場合のみ表示
+            // 次の人がいる場合は常に表示（投票済みでなくても）
             const nextPersonIndex = votingData.currentPerson + 1;
-            if (nextPersonIndex < appSettings.personCount) {
-                const nextPerson = votingData.peopleOrder[nextPersonIndex];
-                const nextPersonKey = `person${nextPerson.id}`;
-                const hasNextData = votingData.choices[nextPersonKey] && votingData.choices[nextPersonKey].length > 0;
-                nextBtn.style.display = hasNextData ? 'inline-block' : 'none';
-            } else {
-                nextBtn.style.display = 'none';
-            }
+            const showNext = nextPersonIndex < appSettings.personCount;
+            nextBtn.style.display = showNext ? 'inline-block' : 'none';
+            console.log('次の人ボタン表示:', showNext);
         }
     } else {
         // 厳格モード：ナビゲーションボタンを非表示
-        if (prevBtn) prevBtn.style.display = 'none';
-        if (nextBtn) nextBtn.style.display = 'none';
+        if (prevBtn) {
+            prevBtn.style.display = 'none';
+            console.log('前の人ボタン非表示（厳格モード）');
+        }
+        if (nextBtn) {
+            nextBtn.style.display = 'none';
+            console.log('次の人ボタン非表示（厳格モード）');
+        }
     }
 }
 
@@ -266,7 +273,10 @@ function goToNextPerson() {
         saveCurrentPersonChoices();
         
         votingData.currentPerson++;
+        console.log('次の人に進みました。現在の人:', votingData.currentPerson);
         showCurrentPerson();
+    } else {
+        console.log('これ以上進めません。最後の人です。');
     }
 }
 
@@ -331,15 +341,42 @@ function submitChoices() {
     console.log(`${personKey}の選択:`, choices);
     console.log(`${personKey}のタグ付き選択:`, choicesWithTags);
     
-    // 次の人へ
-    votingData.currentPerson++;
-    
-    if (votingData.currentPerson < appSettings.personCount) {
-        // まだ投票が残っている
-        showCurrentPerson();
+    if (appSettings.cheatingPrevention === 'strict') {
+        // 厳格モード：自動的に次の人に進む
+        votingData.currentPerson++;
+        
+        if (votingData.currentPerson < appSettings.personCount) {
+            // まだ投票が残っている
+            showCurrentPerson();
+        } else {
+            // 全員終了 - 結果発表待機画面へ
+            showReadyScreen();
+        }
     } else {
-        // 全員終了 - 結果発表待機画面へ
-        showReadyScreen();
+        // 柔軟モード：保存のみ、ナビゲーションは手動
+        alert('保存しました！ナビゲーションボタンで他の人に移動できます。');
+        
+        // 全員が投票完了しているかチェック
+        let allCompleted = true;
+        for (let i = 0; i < appSettings.personCount; i++) {
+            const person = votingData.peopleOrder[i];
+            const personKey = `person${person.id}`;
+            const personChoices = votingData.choices[personKey];
+            if (!personChoices || personChoices.length === 0) {
+                allCompleted = false;
+                break;
+            }
+        }
+        
+        if (allCompleted) {
+            // 「結果発表」ボタンを表示するための何らかの方法を提供
+            if (confirm('全員の投票が完了しました！結果発表画面に進みますか？')) {
+                showReadyScreen();
+            }
+        }
+        
+        // ナビゲーションボタンの表示を更新
+        updateNavigationButtons();
     }
 }
 

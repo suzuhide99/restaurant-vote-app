@@ -649,6 +649,42 @@ body {
     margin-bottom: 20px;
 }
 
+.roulette-info {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.spin-count {
+    font-size: 1.1em;
+    color: #666;
+    font-weight: 500;
+}
+
+.roulette-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.spin-again-btn {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 15px rgba(0, 184, 148, 0.3);
+}
+
+.spin-again-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 184, 148, 0.4);
+}
+
 .final-restaurant {
     font-size: 2.5em;
     font-weight: bold;
@@ -890,5 +926,171 @@ body {
     100% {
         transform: translateY(-100px) scale(1);
         opacity: 0;
+    }
+}
+
+/* ボタングループ */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.settings-btn {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+}
+
+/* 設定画面 */
+#settings-screen {
+    text-align: center;
+}
+
+#settings-screen h2 {
+    font-size: 2em;
+    color: #6c5ce7;
+    margin-bottom: 30px;
+}
+
+.settings-content {
+    margin-bottom: 40px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    border: 2px solid #e9ecef;
+}
+
+.setting-item label {
+    font-size: 1.1em;
+    color: #333;
+    font-weight: 500;
+}
+
+.setting-select {
+    padding: 8px 15px;
+    font-size: 1em;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.setting-select:focus {
+    outline: none;
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.settings-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.save-settings-btn {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.save-settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+}
+
+.cancel-settings-btn {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(99, 110, 114, 0.3);
+}
+
+.cancel-settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 110, 114, 0.4);
+}
+
+/* 追加のアバタースタイル（4人目、5人目用） */
+.sister4, .sister-avatar.sister4 {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    position: relative;
+}
+
+.sister4::after {
+    content: "👨🏻‍🦰";
+    font-size: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.sister5, .sister-avatar.sister5 {
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    position: relative;
+}
+
+.sister5::after {
+    content: "👩🏻‍🦳";
+    font-size: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* レスポンシブ対応（設定画面） */
+@media (max-width: 480px) {
+    .button-group {
+        gap: 10px;
+    }
+    
+    .setting-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .settings-buttons {
+        flex-direction: column;
+    }
+    
+    .save-settings-btn,
+    .cancel-settings-btn {
+        width: 100%;
+        margin: 5px 0;
     }
 }

@@ -22,8 +22,39 @@
         <!-- 開始画面 -->
         <div id="welcome-screen" class="screen active">
             <h1>🍽️ 今日どこで食べる？ 🍽️</h1>
-            <p class="subtitle">3姉妹でレストランを決めよう！</p>
-            <button class="start-btn">はじめる</button>
+            <p class="subtitle" id="subtitle-text">3姉妹でレストランを決めよう！</p>
+            <div class="button-group">
+                <button class="start-btn">はじめる</button>
+                <button class="settings-btn">⚙️ 設定</button>
+            </div>
+        </div>
+
+        <!-- 設定画面 -->
+        <div id="settings-screen" class="screen">
+            <h2>⚙️ 設定</h2>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label for="person-count">投票する人数:</label>
+                    <select id="person-count" class="setting-select">
+                        <option value="2">2人</option>
+                        <option value="3" selected>3人</option>
+                        <option value="4">4人</option>
+                        <option value="5">5人</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="choice-count">一人あたりの投票数:</label>
+                    <select id="choice-count" class="setting-select">
+                        <option value="1">1個</option>
+                        <option value="2">2個</option>
+                        <option value="3" selected>3個</option>
+                    </select>
+                </div>
+            </div>
+            <div class="settings-buttons">
+                <button class="save-settings-btn">保存</button>
+                <button class="cancel-settings-btn">キャンセル</button>
+            </div>
         </div>
 
         <!-- 投票画面 -->
@@ -31,34 +62,11 @@
             <div class="sister-header">
                 <div class="sister-avatar" id="current-avatar"></div>
                 <h2 id="sister-name"></h2>
-                <p class="instruction">食べたいお店を3つ書いてね！</p>
+                <p class="instruction" id="instruction-text">食べたいお店を3つ書いてね！</p>
             </div>
 
-            <div class="input-section">
-                <div class="input-wrapper">
-                    <span class="input-number">1.</span>
-                    <div class="autocomplete-container">
-                        <input type="text" id="choice1" class="restaurant-input" placeholder="1つ目のお店" autocomplete="off">
-                        <div id="autocomplete1" class="autocomplete-items"></div>
-                        <div id="tags1" class="selected-tags"></div>
-                    </div>
-                </div>
-                <div class="input-wrapper">
-                    <span class="input-number">2.</span>
-                    <div class="autocomplete-container">
-                        <input type="text" id="choice2" class="restaurant-input" placeholder="2つ目のお店" autocomplete="off">
-                        <div id="autocomplete2" class="autocomplete-items"></div>
-                        <div id="tags2" class="selected-tags"></div>
-                    </div>
-                </div>
-                <div class="input-wrapper">
-                    <span class="input-number">3.</span>
-                    <div class="autocomplete-container">
-                        <input type="text" id="choice3" class="restaurant-input" placeholder="3つ目のお店" autocomplete="off">
-                        <div id="autocomplete3" class="autocomplete-items"></div>
-                        <div id="tags3" class="selected-tags"></div>
-                    </div>
-                </div>
+            <div class="input-section" id="input-section">
+                <!-- 入力フィールドは動的に生成される -->
             </div>
 
             <button class="submit-btn">決定！</button>
@@ -77,22 +85,8 @@
         <div id="result-screen" class="screen">
             <h2>みんなの選んだお店</h2>
             
-            <div class="sisters-choices">
-                <div class="sister-result">
-                    <div class="sister-avatar sister1"></div>
-                    <h3>長女</h3>
-                    <ul id="sister1-choices"></ul>
-                </div>
-                <div class="sister-result">
-                    <div class="sister-avatar sister2"></div>
-                    <h3>次女</h3>
-                    <ul id="sister2-choices"></ul>
-                </div>
-                <div class="sister-result">
-                    <div class="sister-avatar sister3"></div>
-                    <h3>三女</h3>
-                    <ul id="sister3-choices"></ul>
-                </div>
+            <div class="sisters-choices" id="sisters-choices">
+                <!-- 結果表示は動的に生成される -->
             </div>
 
             <div class="winner-section">
@@ -113,12 +107,18 @@
                 </div>
                 <div class="roulette-pointer"></div>
             </div>
+            <div class="roulette-info">
+                <p class="spin-count">回転回数: <span id="spin-count">0</span>回</p>
+            </div>
             <button class="spin-btn" id="spin-btn">ルーレット開始！</button>
             <div class="roulette-result" id="roulette-result" style="display: none;">
                 <h3>今日のお店は決定！</h3>
                 <div class="final-restaurant" id="final-restaurant"></div>
+                <div class="roulette-actions">
+                    <button class="spin-again-btn">もう一度ルーレット！</button>
+                    <button class="restart-btn-roulette">もう一度最初から</button>
+                </div>
             </div>
-            <button class="restart-btn-roulette" style="display: none;">もう一度最初から</button>
         </div>
 
         <!-- 全員一致の特別演出 -->

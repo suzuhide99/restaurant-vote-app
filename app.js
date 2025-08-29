@@ -1,50 +1,151 @@
 // パスワード認証機能は削除済み
 
-// 姉妹のデータ
-const sisters = [
-    { id: 1, name: '長女', className: 'sister1', emoji: '👩🏻‍🦰' },
-    { id: 2, name: '次女', className: 'sister2', emoji: '🧑🏻‍🦱' },
-    { id: 3, name: '三女', className: 'sister3', emoji: '👩🏼‍🦳' }
-];
-
-// 投票データを保存
-let votingData = {
-    currentSister: 0,
-    choices: {
-        sister1: [],
-        sister2: [],
-        sister3: []
-    },
-    choicesWithTags: {
-        sister1: [],
-        sister2: [],
-        sister3: []
-    }
+// 設定データ
+let appSettings = {
+    personCount: 3,
+    choiceCount: 3
 };
+
+// 人の表示名を生成
+function getPersonName(index, count) {
+    if (count === 3) {
+        const names = ['長女', '次女', '三女'];
+        return names[index] || `${index + 1}番目`;
+    }
+    return `${index + 1}番目`;
+}
+
+// 人のクラス名を生成
+function getPersonClassName(index) {
+    const classes = ['sister1', 'sister2', 'sister3', 'sister4', 'sister5'];
+    return classes[index] || `person${index + 1}`;
+}
+
+// 人の絵文字を生成
+function getPersonEmoji(index) {
+    const emojis = ['👩🏻‍🦰', '🧑🏻‍🦱', '👩🏼‍🦳', '👨🏻‍🦰', '👩🏻‍🦳'];
+    return emojis[index] || '👤';
+}
+
+// 姉妹のデータを動的に生成
+function generatePeople() {
+    const people = [];
+    for (let i = 0; i < appSettings.personCount; i++) {
+        people.push({
+            id: i + 1,
+            name: getPersonName(i, appSettings.personCount),
+            className: getPersonClassName(i),
+            emoji: getPersonEmoji(i)
+        });
+    }
+    return people;
+}
+
+// 投票データを初期化
+function initializeVotingData() {
+    const data = {
+        currentPerson: 0,
+        choices: {},
+        choicesWithTags: {},
+        spinCount: 0,
+        peopleOrder: []
+    };
+    
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const key = `person${i + 1}`;
+        data.choices[key] = [];
+        data.choicesWithTags[key] = [];
+    }
+    
+    return data;
+}
+
+let votingData = initializeVotingData();
 
 // アプリ開始
 function startVoting() {
     console.log('startVoting called');
     soundEffects.playButtonClick();
     
-    // 姉妹の順番をランダムにシャッフル
-    votingData.sistersOrder = [...sisters].sort(() => Math.random() - 0.5);
-    console.log('姉妹の順番:', votingData.sistersOrder.map(s => s.name));
+    // 人の順番をランダムにシャッフル
+    const people = generatePeople();
+    votingData.peopleOrder = [...people].sort(() => Math.random() - 0.5);
+    console.log('投票順番:', votingData.peopleOrder.map(p => p.name));
     
-    votingData.currentSister = 0;
-    votingData.choices = {
-        sister1: [],
-        sister2: [],
-        sister3: []
-    };
-    votingData.choicesWithTags = {
-        sister1: [],
-        sister2: [],
-        sister3: []
-    };
+    // 投票データを初期化
+    votingData = initializeVotingData();
+    votingData.peopleOrder = [...people].sort(() => Math.random() - 0.5);
+    votingData.currentPerson = 0;
+    
+    // 入力画面を生成
+    generateInputFields();
     
     showScreen('voting-screen');
-    showCurrentSister();
+    showCurrentPerson();
+}
+
+// 入力フィールドを動的に生成
+function generateInputFields() {
+    const inputSection = document.getElementById('input-section');
+    inputSection.innerHTML = '';
+    
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-wrapper';
+        
+        const inputNumber = document.createElement('span');
+        inputNumber.className = 'input-number';
+        inputNumber.textContent = `${i}.`;
+        
+        const autocompleteContainer = document.createElement('div');
+        autocompleteContainer.className = 'autocomplete-container';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `choice${i}`;
+        input.className = 'restaurant-input';
+        input.placeholder = `${i}つ目のお店`;
+        input.autocomplete = 'off';
+        
+        const autocompleteDiv = document.createElement('div');
+        autocompleteDiv.id = `autocomplete${i}`;
+        autocompleteDiv.className = 'autocomplete-items';
+        
+        const tagsDiv = document.createElement('div');
+        tagsDiv.id = `tags${i}`;
+        tagsDiv.className = 'selected-tags';
+        
+        autocompleteContainer.appendChild(input);
+        autocompleteContainer.appendChild(autocompleteDiv);
+        autocompleteContainer.appendChild(tagsDiv);
+        
+        wrapper.appendChild(inputNumber);
+        wrapper.appendChild(autocompleteContainer);
+        
+        inputSection.appendChild(wrapper);
+    }
+    
+    // オートコンプリートを再設定
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
+        setupAutocomplete(`choice${i}`, `autocomplete${i}`, `tags${i}`);
+        
+        // Enterキーでの移動/送信を設定
+        const input = document.getElementById(`choice${i}`);
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (i < appSettings.choiceCount) {
+                        // 次の入力フィールドへ
+                        const nextInput = document.getElementById(`choice${i + 1}`);
+                        if (nextInput) nextInput.focus();
+                    } else {
+                        // 最後のフィールドなら送信
+                        submitChoices();
+                    }
+                }
+            });
+        }
+    }
 }
 
 // 画面切り替え
@@ -60,68 +161,87 @@ function showScreen(screenId) {
     }
 }
 
-// 現在の姉妹の投票画面を表示
-function showCurrentSister() {
-    const sister = votingData.sistersOrder[votingData.currentSister];
+// 現在の人の投票画面を表示
+function showCurrentPerson() {
+    const person = votingData.peopleOrder[votingData.currentPerson];
     
-    document.getElementById('current-avatar').className = `sister-avatar ${sister.className}`;
-    document.getElementById('sister-name').textContent = `${sister.name}の番`;
+    document.getElementById('current-avatar').className = `sister-avatar ${person.className}`;
+    document.getElementById('sister-name').textContent = `${person.name}の番`;
+    
+    // 指示テキストを更新
+    const instructionText = document.getElementById('instruction-text');
+    if (appSettings.choiceCount === 1) {
+        instructionText.textContent = '食べたいお店を1つ書いてね！';
+    } else {
+        instructionText.textContent = `食べたいお店を${appSettings.choiceCount}つ書いてね！`;
+    }
     
     // 入力フィールドとタグをクリア
-    for (let i = 1; i <= 3; i++) {
-        document.getElementById(`choice${i}`).value = '';
-        document.getElementById(`tags${i}`).innerHTML = '';
-        document.getElementById(`autocomplete${i}`).innerHTML = '';
-        document.getElementById(`autocomplete${i}`).classList.remove('show');
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
+        const choiceInput = document.getElementById(`choice${i}`);
+        const tagsDiv = document.getElementById(`tags${i}`);
+        const autocompleteDiv = document.getElementById(`autocomplete${i}`);
+        
+        if (choiceInput) choiceInput.value = '';
+        if (tagsDiv) tagsDiv.innerHTML = '';
+        if (autocompleteDiv) {
+            autocompleteDiv.innerHTML = '';
+            autocompleteDiv.classList.remove('show');
+        }
     }
     
     // 最初の入力フィールドにフォーカス
-    document.getElementById('choice1').focus();
+    const firstInput = document.getElementById('choice1');
+    if (firstInput) firstInput.focus();
 }
 
 // 選択を送信
 function submitChoices() {
-    console.log('submitChoices関数が呼びれました！');
+    console.log('submitChoices関数が呼ばれました！');
     soundEffects.playSubmitSound();
     const choices = [];
     const choicesWithTags = [];
     
     // デバッグ用：入力値をチェック
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
         const input = document.getElementById(`choice${i}`);
         const value = input ? input.value.trim() : '';
         console.log(`choice${i}の値:`, `"${value}"`);
     }
     
-    for (let i = 1; i <= 3; i++) {
-        const input = document.getElementById(`choice${i}`).value.trim();
-        if (!input) {
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
+        const input = document.getElementById(`choice${i}`);
+        if (!input) continue;
+        
+        const inputValue = input.value.trim();
+        if (!inputValue) {
             console.log(`choice${i}が空です！`);
-            alert('3つすべてのお店を入力してください！');
+            const countText = appSettings.choiceCount === 1 ? '1つ' : `${appSettings.choiceCount}つすべて`;
+            alert(`${countText}のお店を入力してください！`);
             return;
         }
         
         // 正規化してタグを取得
-        const normalized = normalizeRestaurantName(input);
+        const normalized = normalizeRestaurantName(inputValue);
         choices.push(normalized.name);
         choicesWithTags.push(normalized);
     }
     
-    // データ保存（実際の姉妹IDに基づいて保存）
-    const sister = votingData.sistersOrder[votingData.currentSister];
-    const sisterKey = `sister${sister.id}`;
-    votingData.choices[sisterKey] = choices;
-    votingData.choicesWithTags[sisterKey] = choicesWithTags;
+    // データ保存
+    const person = votingData.peopleOrder[votingData.currentPerson];
+    const personKey = `person${person.id}`;
+    votingData.choices[personKey] = choices;
+    votingData.choicesWithTags[personKey] = choicesWithTags;
     
-    console.log(`${sisterKey}の選択:`, choices);
-    console.log(`${sisterKey}のタグ付き選択:`, choicesWithTags);
+    console.log(`${personKey}の選択:`, choices);
+    console.log(`${personKey}のタグ付き選択:`, choicesWithTags);
     
-    // 次の姉妹へ
-    votingData.currentSister++;
+    // 次の人へ
+    votingData.currentPerson++;
     
-    if (votingData.currentSister < 3) {
+    if (votingData.currentPerson < appSettings.personCount) {
         // まだ投票が残っている
-        showCurrentSister();
+        showCurrentPerson();
     } else {
         // 全員終了 - 結果発表待機画面へ
         showReadyScreen();
@@ -142,12 +262,45 @@ function showResults() {
     showResultsAfterDrumroll();
 }
 
+// 結果表示エリアを動的に生成
+function generateResultDisplay() {
+    const sistersChoicesDiv = document.getElementById('sisters-choices');
+    sistersChoicesDiv.innerHTML = '';
+    
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        
+        const sisterResult = document.createElement('div');
+        sisterResult.className = 'sister-result';
+        
+        const avatar = document.createElement('div');
+        avatar.className = `sister-avatar ${person.className}`;
+        
+        const name = document.createElement('h3');
+        name.textContent = person.name;
+        
+        const choicesList = document.createElement('ul');
+        choicesList.id = `person${person.id}-choices`;
+        
+        sisterResult.appendChild(avatar);
+        sisterResult.appendChild(name);
+        sisterResult.appendChild(choicesList);
+        
+        sistersChoicesDiv.appendChild(sisterResult);
+    }
+}
+
 // ドラムロール後の結果表示
 function showResultsAfterDrumroll() {
-    // 各姉妹の選択を表示
-    for (let i = 1; i <= 3; i++) {
-        const choices = votingData.choices[`sister${i}`];
-        const listElement = document.getElementById(`sister${i}-choices`);
+    // 結果表示エリアを生成
+    generateResultDisplay();
+    
+    // 各人の選択を表示
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        const personKey = `person${person.id}`;
+        const choices = votingData.choices[personKey];
+        const listElement = document.getElementById(`${personKey}-choices`);
         listElement.innerHTML = '';
         
         choices.forEach(choice => {
@@ -167,10 +320,12 @@ function showResultsAfterDrumroll() {
     // 投票結果を集計（同一人物の重複は除外）
     const voteCount = {};
     
-    // 各姉妹の選択を個別に処理（重複除去）
-    for (let i = 1; i <= 3; i++) {
-        const sisterChoices = votingData.choices[`sister${i}`];
-        const uniqueChoices = [...new Set(sisterChoices.map(choice => choice.toLowerCase()))];
+    // 各人の選択を個別に処理（重複除去）
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        const personKey = `person${person.id}`;
+        const personChoices = votingData.choices[personKey];
+        const uniqueChoices = [...new Set(personChoices.map(choice => choice.toLowerCase()))];
         
         uniqueChoices.forEach(choice => {
             voteCount[choice] = (voteCount[choice] || 0) + 1;
@@ -195,18 +350,20 @@ function showResultsAfterDrumroll() {
     if (tagMatches.length > 0) {
         // タグ一致している店舗の中から最多票を選ぶ（重複除去）
         const taggedChoices = {};
-        for (let i = 1; i <= 3; i++) {
-            const sisterTaggedChoices = new Set();
-            votingData.choicesWithTags[`sister${i}`].forEach((choice, index) => {
+        for (let i = 0; i < appSettings.personCount; i++) {
+            const person = votingData.peopleOrder[i];
+            const personKey = `person${person.id}`;
+            const personTaggedChoices = new Set();
+            votingData.choicesWithTags[personKey].forEach((choice, index) => {
                 const hasMatchingTag = choice.tags.some(tag => tagMatches.includes(tag));
                 if (hasMatchingTag) {
-                    const name = votingData.choices[`sister${i}`][index].toLowerCase();
-                    sisterTaggedChoices.add(name);
+                    const name = votingData.choices[personKey][index].toLowerCase();
+                    personTaggedChoices.add(name);
                 }
             });
             
-            // この姉妹のユニークな選択肢をカウント
-            sisterTaggedChoices.forEach(name => {
+            // この人のユニークな選択肢をカウント
+            personTaggedChoices.forEach(name => {
                 taggedChoices[name] = (taggedChoices[name] || 0) + 1;
             });
         }
@@ -214,24 +371,24 @@ function showResultsAfterDrumroll() {
         if (Object.keys(taggedChoices).length > 0) {
             const maxTagVotes = Math.max(...Object.values(taggedChoices));
             const tagWinners = Object.entries(taggedChoices)
-                .filter(([choice, count]) => count === maxTagVotes)
+                .filter(([, count]) => count === maxTagVotes)
                 .map(([choice]) => choice);
             tagMatchWinner = tagWinners[0];
         }
     }
     
-    if (partialMatches.length > 0 && maxVotes >= 3) {
-        // 部分一致がある場合（3人が同じ店を選んだ）- これを最優先に
+    if (partialMatches.length > 0 && maxVotes >= appSettings.personCount) {
+        // 部分一致がある場合（全員が同じ店を選んだ）- これを最優先に
         isUnanimous = true; // 全員一致
         showPartialMatchCelebration(partialMatches[0], maxVotes);
         soundEffects.playFanfare();
     } else if (tagMatches.length > 0) {
-        // タグ一致（3人全員が同じジャンルを選んだが、店は異なる）
+        // タグ一致（全員が同じジャンルを選んだが、店は異なる）
         isUnanimous = true; // 全員一致
         showTagMatchCelebration(tagMatches);
         soundEffects.playTagMatch();
-    } else if (maxVotes >= 3) {
-        // 3票以上獲得（ただし、全員一致ではない - 1人が同じ店を3つ選んだ場合など）
+    } else if (maxVotes >= Math.ceil(appSettings.personCount / 2)) {
+        // 過半数以上獲得
         isUnanimous = false; // 全員一致ではない
         if (winners.length === 1) {
             // 単独勝利
@@ -416,19 +573,7 @@ function startConfetti() {
 // アプリをリセット
 function resetApp() {
     soundEffects.playButtonClick();
-    votingData = {
-        currentSister: 0,
-        choices: {
-            sister1: [],
-            sister2: [],
-            sister3: []
-        },
-        choicesWithTags: {
-            sister1: [],
-            sister2: [],
-            sister3: []
-        }
-    };
+    votingData = initializeVotingData();
     
     // 紙吹雪エフェクトをクリア
     const canvas = document.getElementById('confetti-canvas');
@@ -437,6 +582,55 @@ function resetApp() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
     
+    // サブタイトルを更新
+    updateSubtitle();
+    
+    showScreen('welcome-screen');
+}
+
+// サブタイトルを更新
+function updateSubtitle() {
+    const subtitleText = document.getElementById('subtitle-text');
+    if (appSettings.personCount === 3) {
+        subtitleText.textContent = '3姉妹でレストランを決めよう！';
+    } else {
+        subtitleText.textContent = `${appSettings.personCount}人でレストランを決めよう！`;
+    }
+}
+
+// 設定を表示
+function showSettings() {
+    soundEffects.playButtonClick();
+    
+    // 現在の設定値をセット
+    document.getElementById('person-count').value = appSettings.personCount;
+    document.getElementById('choice-count').value = appSettings.choiceCount;
+    
+    showScreen('settings-screen');
+}
+
+// 設定を保存
+function saveSettings() {
+    soundEffects.playButtonClick();
+    
+    const personCount = parseInt(document.getElementById('person-count').value);
+    const choiceCount = parseInt(document.getElementById('choice-count').value);
+    
+    appSettings.personCount = personCount;
+    appSettings.choiceCount = choiceCount;
+    
+    // 投票データを初期化
+    votingData = initializeVotingData();
+    
+    // サブタイトルを更新
+    updateSubtitle();
+    
+    showScreen('welcome-screen');
+}
+
+// 設定をキャンセル
+function cancelSettings() {
+    soundEffects.playButtonClick();
     showScreen('welcome-screen');
 }
 
@@ -453,20 +647,33 @@ function capitalizeFirst(str) {
 
 // 部分一致をチェック
 function checkPartialMatches() {
-    const sister1 = votingData.choices.sister1.map(c => c.toLowerCase());
-    const sister2 = votingData.choices.sister2.map(c => c.toLowerCase());
-    const sister3 = votingData.choices.sister3.map(c => c.toLowerCase());
+    if (appSettings.personCount < 2) return [];
+    
+    const allChoices = [];
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        const personKey = `person${person.id}`;
+        const personChoices = votingData.choices[personKey].map(c => c.toLowerCase());
+        allChoices.push(personChoices);
+    }
     
     const matches = [];
     
-    // 各選択肢をチェック
-    sister1.forEach(choice => {
-        if (sister2.includes(choice) && sister3.includes(choice)) {
-            if (!matches.includes(choice)) {
+    // 最初の人の選択肢をチェック
+    if (allChoices.length > 0) {
+        allChoices[0].forEach(choice => {
+            let isInAll = true;
+            for (let i = 1; i < allChoices.length; i++) {
+                if (!allChoices[i].includes(choice)) {
+                    isInAll = false;
+                    break;
+                }
+            }
+            if (isInAll && !matches.includes(choice)) {
                 matches.push(choice);
             }
-        }
-    });
+        });
+    }
     
     return matches;
 }
@@ -596,25 +803,38 @@ function startLightConfetti() {
 
 // タグ一致をチェック
 function checkTagMatches() {
+    if (appSettings.personCount < 2) return [];
+    
     const allTags = [];
     
-    // 各姉妹のタグを収集
-    for (let i = 1; i <= 3; i++) {
-        const sisterTags = new Set();
-        votingData.choicesWithTags[`sister${i}`].forEach(choice => {
-            choice.tags.forEach(tag => sisterTags.add(tag));
+    // 各人のタグを収集
+    for (let i = 0; i < appSettings.personCount; i++) {
+        const person = votingData.peopleOrder[i];
+        const personKey = `person${person.id}`;
+        const personTags = new Set();
+        votingData.choicesWithTags[personKey].forEach(choice => {
+            choice.tags.forEach(tag => personTags.add(tag));
         });
-        allTags.push(sisterTags);
-        console.log(`姉妹${i}のタグ:`, Array.from(sisterTags));
+        allTags.push(personTags);
+        console.log(`${person.name}のタグ:`, Array.from(personTags));
     }
     
     // 共通のタグを見つける
     const commonTags = [];
-    allTags[0].forEach(tag => {
-        if (allTags[1].has(tag) && allTags[2].has(tag)) {
-            commonTags.push(tag);
-        }
-    });
+    if (allTags.length > 0) {
+        allTags[0].forEach(tag => {
+            let isCommon = true;
+            for (let i = 1; i < allTags.length; i++) {
+                if (!allTags[i].has(tag)) {
+                    isCommon = false;
+                    break;
+                }
+            }
+            if (isCommon) {
+                commonTags.push(tag);
+            }
+        });
+    }
     
     console.log('共通タグ:', commonTags);
     return commonTags;
@@ -816,9 +1036,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // パスワード認証機能は削除済み
 
 function startApp() {
-    // オートコンプリートを設定
-    for (let i = 1; i <= 3; i++) {
-        setupAutocomplete(`choice${i}`, `autocomplete${i}`, `tags${i}`);
+    // 設定関連のイベントリスナー
+    const settingsBtn = document.querySelector('.settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', showSettings);
+        console.log('Settings button event listener added');
+    }
+    
+    const saveSettingsBtn = document.querySelector('.save-settings-btn');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveSettings);
+        console.log('Save settings button event listener added');
+    }
+    
+    const cancelSettingsBtn = document.querySelector('.cancel-settings-btn');
+    if (cancelSettingsBtn) {
+        cancelSettingsBtn.addEventListener('click', cancelSettings);
+        console.log('Cancel settings button event listener added');
     }
     
     // スタートボタンのイベントリスナー
@@ -888,21 +1122,8 @@ function startApp() {
         console.log('Roulette restart button event listener added');
     }
     
-    // Enterキーで送信
-    const inputs = document.querySelectorAll('.restaurant-input');
-    inputs.forEach((input, index) => {
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (index < inputs.length - 1) {
-                    // 次の入力フィールドへ
-                    inputs[index + 1].focus();
-                } else {
-                    // 最後のフィールドなら送信
-                    submitChoices();
-                }
-            }
-        });
-    });
+    // Enterキーの処理は動的に設定されるため、ここでは削除
+    // generateInputFields()内でオートコンプリート設定時に一緒に設定される
 }
 
 // ルーレット機能
@@ -1117,7 +1338,9 @@ function spinRoulette() {
         // 紙吹雪エフェクト
         startLightConfetti();
         
-        // ボタンを隠す
-        spinBtn.style.display = 'none';
+        // ボタンを再表示して再利用可能にする
+        spinBtn.disabled = false;
+        spinBtn.textContent = 'もう一度回す！';
+        spinBtn.style.display = 'block';
     }, 7000);
 }

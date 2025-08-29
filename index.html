@@ -50,6 +50,13 @@
                         <option value="3" selected>3個</option>
                     </select>
                 </div>
+                <div class="setting-item">
+                    <label for="cheating-prevention">投票モード:</label>
+                    <select id="cheating-prevention" class="setting-select">
+                        <option value="flexible">柔軟モード（前の人に戻れる）</option>
+                        <option value="strict" selected>厳格モード（カンニング禁止）</option>
+                    </select>
+                </div>
             </div>
             <div class="settings-buttons">
                 <button class="save-settings-btn">保存</button>
@@ -69,7 +76,11 @@
                 <!-- 入力フィールドは動的に生成される -->
             </div>
 
-            <button class="submit-btn">決定！</button>
+            <div class="voting-actions">
+                <button class="prev-person-btn" id="prev-person-btn" style="display: none;">← 前の人</button>
+                <button class="submit-btn">決定！</button>
+                <button class="next-person-btn" id="next-person-btn" style="display: none;">次の人 →</button>
+            </div>
         </div>
 
         <!-- 結果発表待機画面 -->

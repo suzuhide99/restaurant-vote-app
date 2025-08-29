@@ -1072,6 +1072,41 @@ body {
     transform: translate(-50%, -50%);
 }
 
+/* 投票画面のアクションボタン */
+.voting-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.prev-person-btn,
+.next-person-btn {
+    padding: 12px 20px;
+    font-size: 1em;
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+}
+
+.prev-person-btn:hover,
+.next-person-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+}
+
+.prev-person-btn:disabled,
+.next-person-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* レスポンシブ対応（設定画面） */
 @media (max-width: 480px) {
     .button-group {
@@ -1092,5 +1127,15 @@ body {
     .cancel-settings-btn {
         width: 100%;
         margin: 5px 0;
+    }
+    
+    .voting-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .prev-person-btn,
+    .next-person-btn {
+        width: 200px;
     }
 }

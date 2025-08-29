@@ -3,7 +3,8 @@
 // 設定データ
 let appSettings = {
     personCount: 3,
-    choiceCount: 3
+    choiceCount: 3,
+    cheatingPrevention: 'strict' // 'strict' or 'flexible'
 };
 
 // 人の表示名を生成
@@ -182,14 +183,31 @@ function showCurrentPerson() {
         instructionText.textContent = `食べたいお店を${appSettings.choiceCount}つ書いてね！`;
     }
     
-    // 入力フィールドとタグをクリア
+    // ナビゲーションボタンの表示制御
+    updateNavigationButtons();
+    
+    // 既存の選択肢があれば復元、なければクリア
+    const personKey = `person${person.id}`;
+    const existingChoices = votingData.choices[personKey] || [];
+    
     for (let i = 1; i <= appSettings.choiceCount; i++) {
         const choiceInput = document.getElementById(`choice${i}`);
         const tagsDiv = document.getElementById(`tags${i}`);
         const autocompleteDiv = document.getElementById(`autocomplete${i}`);
         
-        if (choiceInput) choiceInput.value = '';
-        if (tagsDiv) tagsDiv.innerHTML = '';
+        if (choiceInput) {
+            // 既存の選択肢があれば復元
+            choiceInput.value = existingChoices[i-1] || '';
+            
+            // タグを復元
+            if (existingChoices[i-1]) {
+                const normalized = normalizeRestaurantName(existingChoices[i-1]);
+                showTags(normalized.tags, tagsDiv);
+            } else if (tagsDiv) {
+                tagsDiv.innerHTML = '';
+            }
+        }
+        
         if (autocompleteDiv) {
             autocompleteDiv.innerHTML = '';
             autocompleteDiv.classList.remove('show');
@@ -199,6 +217,77 @@ function showCurrentPerson() {
     // 最初の入力フィールドにフォーカス
     const firstInput = document.getElementById('choice1');
     if (firstInput) firstInput.focus();
+}
+
+// ナビゲーションボタンの表示制御
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-person-btn');
+    const nextBtn = document.getElementById('next-person-btn');
+    
+    if (appSettings.cheatingPrevention === 'flexible') {
+        // 柔軟モード：ナビゲーションボタンを表示
+        if (prevBtn) {
+            prevBtn.style.display = votingData.currentPerson > 0 ? 'inline-block' : 'none';
+        }
+        if (nextBtn) {
+            // 次の人に投票済みデータがある場合のみ表示
+            const nextPersonIndex = votingData.currentPerson + 1;
+            if (nextPersonIndex < appSettings.personCount) {
+                const nextPerson = votingData.peopleOrder[nextPersonIndex];
+                const nextPersonKey = `person${nextPerson.id}`;
+                const hasNextData = votingData.choices[nextPersonKey] && votingData.choices[nextPersonKey].length > 0;
+                nextBtn.style.display = hasNextData ? 'inline-block' : 'none';
+            } else {
+                nextBtn.style.display = 'none';
+            }
+        }
+    } else {
+        // 厳格モード：ナビゲーションボタンを非表示
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+    }
+}
+
+// 前の人に戻る
+function goToPreviousPerson() {
+    if (votingData.currentPerson > 0) {
+        // 現在の入力を保存
+        saveCurrentPersonChoices();
+        
+        votingData.currentPerson--;
+        showCurrentPerson();
+    }
+}
+
+// 次の人に進む
+function goToNextPerson() {
+    if (votingData.currentPerson < appSettings.personCount - 1) {
+        // 現在の入力を保存
+        saveCurrentPersonChoices();
+        
+        votingData.currentPerson++;
+        showCurrentPerson();
+    }
+}
+
+// 現在の人の選択肢を保存
+function saveCurrentPersonChoices() {
+    const person = votingData.peopleOrder[votingData.currentPerson];
+    const personKey = `person${person.id}`;
+    const choices = [];
+    const choicesWithTags = [];
+    
+    for (let i = 1; i <= appSettings.choiceCount; i++) {
+        const input = document.getElementById(`choice${i}`);
+        if (input && input.value.trim()) {
+            const normalized = normalizeRestaurantName(input.value.trim());
+            choices.push(normalized.name);
+            choicesWithTags.push(normalized);
+        }
+    }
+    
+    votingData.choices[personKey] = choices;
+    votingData.choicesWithTags[personKey] = choicesWithTags;
 }
 
 // 選択を送信
@@ -617,6 +706,7 @@ function showSettings() {
     // 現在の設定値をセット
     document.getElementById('person-count').value = appSettings.personCount;
     document.getElementById('choice-count').value = appSettings.choiceCount;
+    document.getElementById('cheating-prevention').value = appSettings.cheatingPrevention;
     
     showScreen('settings-screen');
 }
@@ -627,9 +717,11 @@ function saveSettings() {
     
     const personCount = parseInt(document.getElementById('person-count').value);
     const choiceCount = parseInt(document.getElementById('choice-count').value);
+    const cheatingPrevention = document.getElementById('cheating-prevention').value;
     
     appSettings.personCount = personCount;
     appSettings.choiceCount = choiceCount;
+    appSettings.cheatingPrevention = cheatingPrevention;
     
     // 投票データを初期化
     votingData = initializeVotingData();
@@ -1096,6 +1188,14 @@ function startApp() {
             console.log('イベント委譲で決定ボタンがクリックされました！');
             e.preventDefault();
             submitChoices();
+        } else if (e.target.classList.contains('prev-person-btn')) {
+            console.log('前の人ボタンがクリックされました！');
+            e.preventDefault();
+            goToPreviousPerson();
+        } else if (e.target.classList.contains('next-person-btn')) {
+            console.log('次の人ボタンがクリックされました！');
+            e.preventDefault();
+            goToNextPerson();
         }
     });
     

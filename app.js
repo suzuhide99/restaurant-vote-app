@@ -1149,18 +1149,34 @@ function startRoulette() {
     
     // 全ての選択肢を集める
     const allChoices = [];
-    for (let i = 0; i < appSettings.personCount; i++) {
-        const person = votingData.peopleOrder[i];
-        const personKey = `person${person.id}`;
-        console.log(`${i+1}番目の人: ${person.name}, キー: ${personKey}`);
-        
-        const choices = votingData.choices[personKey];
-        console.log(`${personKey}の選択:`, choices);
-        
-        if (choices && choices.length > 0) {
-            choices.forEach(choice => {
-                allChoices.push(choice);
-            });
+    
+    // peopleOrderが存在しない場合は投票データのキーから直接取得
+    if (!votingData.peopleOrder || votingData.peopleOrder.length === 0) {
+        console.log('peopleOrderが空です。投票データのキーから直接取得します。');
+        Object.keys(votingData.choices).forEach(personKey => {
+            const choices = votingData.choices[personKey];
+            console.log(`${personKey}の選択 (直接取得):`, choices);
+            if (choices && choices.length > 0) {
+                choices.forEach(choice => {
+                    allChoices.push(choice);
+                });
+            }
+        });
+    } else {
+        // 通常のpeopleOrderを使用した取得
+        for (let i = 0; i < appSettings.personCount; i++) {
+            const person = votingData.peopleOrder[i];
+            const personKey = `person${person.id}`;
+            console.log(`${i+1}番目の人: ${person.name}, キー: ${personKey}`);
+            
+            const choices = votingData.choices[personKey];
+            console.log(`${personKey}の選択:`, choices);
+            
+            if (choices && choices.length > 0) {
+                choices.forEach(choice => {
+                    allChoices.push(choice);
+                });
+            }
         }
     }
     

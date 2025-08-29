@@ -319,17 +319,30 @@ function submitChoices() {
         if (!input) continue;
         
         const inputValue = input.value.trim();
-        if (!inputValue) {
-            console.log(`choice${i}が空です！`);
+        if (inputValue) {
+            // 正規化してタグを取得
+            const normalized = normalizeRestaurantName(inputValue);
+            choices.push(normalized.name);
+            choicesWithTags.push(normalized);
+        }
+    }
+    
+    // 柔軟モードの場合は部分的な保存も許可、厳格モードは全て必須
+    if (appSettings.cheatingPrevention === 'strict') {
+        // 厳格モード：全てのフィールドが必須
+        if (choices.length < appSettings.choiceCount) {
+            console.log(`入力不足です！入力数: ${choices.length}, 必要数: ${appSettings.choiceCount}`);
             const countText = appSettings.choiceCount === 1 ? '1つ' : `${appSettings.choiceCount}つすべて`;
             alert(`${countText}のお店を入力してください！`);
             return;
         }
-        
-        // 正規化してタグを取得
-        const normalized = normalizeRestaurantName(inputValue);
-        choices.push(normalized.name);
-        choicesWithTags.push(normalized);
+    } else {
+        // 柔軟モード：最低1つあれば保存可能
+        if (choices.length === 0) {
+            console.log('1つも入力されていません！');
+            alert('少なくとも1つのお店を入力してください！');
+            return;
+        }
     }
     
     // データ保存
@@ -354,21 +367,28 @@ function submitChoices() {
         }
     } else {
         // 柔軟モード：保存のみ、ナビゲーションは手動
-        alert('保存しました！ナビゲーションボタンで他の人に移動できます。');
+        const person = votingData.peopleOrder[votingData.currentPerson];
+        const savedCount = choices.length;
+        const message = savedCount === appSettings.choiceCount ? 
+            `${person.name}の選択を保存しました！` : 
+            `${person.name}の選択を保存しました！（${savedCount}/${appSettings.choiceCount}個）`;
+        alert(message);
         
         // 全員が投票完了しているかチェック
         let allCompleted = true;
+        let totalChoices = 0;
         for (let i = 0; i < appSettings.personCount; i++) {
-            const person = votingData.peopleOrder[i];
-            const personKey = `person${person.id}`;
-            const personChoices = votingData.choices[personKey];
-            if (!personChoices || personChoices.length === 0) {
+            const checkPerson = votingData.peopleOrder[i];
+            const checkPersonKey = `person${checkPerson.id}`;
+            const checkPersonChoices = votingData.choices[checkPersonKey];
+            if (!checkPersonChoices || checkPersonChoices.length === 0) {
                 allCompleted = false;
-                break;
+            } else {
+                totalChoices += checkPersonChoices.length;
             }
         }
         
-        if (allCompleted) {
+        if (allCompleted && totalChoices > 0) {
             // 「結果発表」ボタンを表示するための何らかの方法を提供
             if (confirm('全員の投票が完了しました！結果発表画面に進みますか？')) {
                 showReadyScreen();
